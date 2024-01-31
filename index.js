@@ -1,7 +1,9 @@
+// Install required packages 
 const inquirer = require('inquirer');
 const mysql = require("mysql2");
 require("console.table");
 
+// Create mysql connection
 const db = mysql.createConnection({
     host: "127.0.0.1",
     port: 3306,
@@ -17,6 +19,7 @@ db.connect(function(err) {
     }
 })
 
+// Utilize inquirer prompt to create questions and choices
 inquirer.prompt([
     {
         type: 'list',
@@ -36,7 +39,6 @@ inquirer.prompt([
 .then ((answers) => {
 
 
-
     switch(answers.action) {
         case "View All Employees":
             // function
@@ -47,8 +49,8 @@ inquirer.prompt([
                 }
                 console.table(result)
             })
-
             break;
+
         case "View All Departments":
              // function
             db.query("SELECT * FROM department;", function(err, result){
@@ -58,8 +60,8 @@ inquirer.prompt([
                 }
                 console.table(result)
             })
-
             break;
+
         case "View All Roles":
             // function
             db.query("SELECT * FROM role;", function(err, result){
@@ -69,18 +71,28 @@ inquirer.prompt([
                 }
                 console.table(result)
             })
-
             break;
+
         case "Add Employee":
             // function
-
+            db.query("INSERT INTO * FROM ")
             break;
+        
         case "Update Employee Role":
             //function
             break;
+        
         case "Add Role":
             // function
+            db.query(`INSERT INTO department (id, name) VALUES (1, "Sales")`, function(err, result){
+                if(err) {
+                    console.log(err);
+                    return;
+                }
+                console.table(result)
+            })
             break;
+    
         case "Add Department":
             // function
             //  ask question first using inquirer prompt

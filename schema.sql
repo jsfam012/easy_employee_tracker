@@ -1,7 +1,11 @@
+-- Create database for mysql
+
 DROP DATABASE IF EXISTS employee_tracker;
 CREATE DATABASE employee_tracker;
 
 USE employee_tracker;
+
+-- Design database schema for the project
 
 CREATE TABLE department (
     id INT PRIMARY KEY,
