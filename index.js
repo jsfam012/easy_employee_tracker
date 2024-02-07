@@ -19,7 +19,80 @@ db.connect(function (err) {
     }
 })
 
-// Utilize inquirer prompt to create questions and choices
+
+async function addEmployee() {
+
+    // preparing for the role choices
+    const [allRoles] = await db.promise().query("SELECT * FROM role;");
+
+    const roleChoices = allRoles.map(function (role) {
+        return {
+            value: role.id,
+            name: role.title
+        }
+    })
+
+    
+    // preparing for employee choices
+    const [allEmployees] = await db.promise().query("SELECT * FROM employee;");
+
+    const employeeChoices = allEmployees.map(function (employee) {
+        return {
+            value: employee.id,
+            name: employee.first_name + " " + employee.last_name
+        }
+    })
+
+
+    // start asking questions
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'first_name',
+            message: 'What is employee\'s first name??'
+
+        },
+        {
+            type: 'input',
+            name: 'last_name',
+            message: 'What is employee\'s last name??'
+
+        },
+        {
+            type: 'list',
+            name: 'role_id',
+            message: 'What is employee\'s role??',
+            choices: roleChoices
+
+        },
+        {
+            type: 'list',
+            name: 'manager_id',
+            message: 'What is employee\'s manager?',
+            choices: employeeChoices
+
+        },
+        // after this, 'What is employee's last name?/'What is the employee's role?'/'Who is the employee's namager?
+    ])
+        .then(answers => {
+
+            db.query(
+                "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (? ,? ,? ,?)",
+                [answers.first_name, answers.last_name, answers.role_id, answers.manager_id],
+                function () {
+                    console.log("Employee has been added!")
+                    // mainMenu()
+                }
+            )
+
+        })
+}
+
+
+
+// Utilize inquirer prompt to create questions and choices 
+// function mainMenu
+
 inquirer.prompt([
     {
         type: 'list',
@@ -37,8 +110,6 @@ inquirer.prompt([
     },
 ])
     .then((answers) => {
-
-
         switch (answers.action) {
             case "View All Employees":
                 // function
@@ -50,6 +121,7 @@ inquirer.prompt([
                     //Used console.table not console.log to create table in terminal
                     console.table(result)
                 })
+
                 break;
 
             case "View All Departments":
@@ -75,18 +147,14 @@ inquirer.prompt([
                 break;
 
             case "Add Employee":
-                inquirer.prompt([
-                    {
-                        type: 'input',
-                        name: 'action',
-                        message: 'What is employee\'s first name??'
-                        
-                    },
-                    // after this, 'What is employee's last name?/'What is the employee's role?'/'Who is the employee's namager?
-                ]);
-            
+                addEmployee();
+
+                // db.query("INSERT INTO employee;", function (err, results) {
+                //     const modifiedResults = results.map(function (employee) )
+
+
                 // function
-                db.query("INSERT INTO * FROM ")
+                // db.query("INSERT INTO * FROM ")
                 break;
 
             case "Update Employee Role":
@@ -98,44 +166,78 @@ inquirer.prompt([
                     },
                     //'Which role do you want to assign the selected employee?    
                 ]);
-            //function
+                //function
                 break;
 
             case "Add Role":
-                inquirer.prompt([
-                    {
-                        type: 'input',
-                        name: 'action',
-                        message: 'What is the name of the role?'
-                    },
-                    // after this, "What is the name of the role?"/"What is the salary of the role?"/"Whcih department does the role belong to?"
-                ]);    
-            // function
-                db.query(`INSERT INTO department (id, name) VALUES (1, "Sales")`, function (err, result) {
-                    if (err) {
-                        console.log(err);
-                        return;
-                    }
-                    console.table(result)
+
+                db.query("SELECT * FROM department;", function (err, results) {
+                    const modifiedResults = results.map(function (department) {
+                        return {
+                            value: department.id,
+                            name: department.name
+                        }
+                    })
+                    inquirer.prompt([
+                        {
+                            type: 'input',
+                            name: 'title',
+                            message: 'What is the title of the role?'
+
+                        },
+                        {
+                            type: 'input',
+                            name: 'salary',
+                            message: 'What is the salary?'
+
+                        },
+                        {
+                            type: 'list',
+                            name: 'department_id',
+                            message: 'Which department does this role belong to?',
+                            choices: modifiedResults
+                        },
+
+
+                    ])
+                        .then(answers => {
+
+
+                            db.query(
+                                "INSERT INTO role (title,salary, department_id) VALUES (? ,? ,?)",
+                                [answers.title, answers.salary, answers.department_id],
+                                function () {
+                                    console.log("Role has been added!")
+                                }
+                            )
+
+                        })
+
                 })
+
+
                 break;
 
             case "Add Department":
-                //  ask question first using inquirer prompt
-                // SA
+
+
                 inquirer.prompt([
                     {
                         type: 'input',
                         name: 'action',
-                        message: 'What is the name of the department?'
-                        
+                        message: 'What is the name of the department?',
                     },
-                ]);
-                // function
-                // db.query('INSERT INTO (')
+                ])
 
-              
+                    .then(answers => {
 
+                        db.query(
+                            "INSERT INTO department (name) VALUES (?)",
+                            [answers.name], function () {
+                                console.log("Department has been added!")
+                            }
+                        )
+                    })
 
                 break;
 
@@ -144,4 +246,8 @@ inquirer.prompt([
         }
 
 
+    })
+    .catch(err => {
+        console.log("There has been an error!")
+        console.log(err)
     })
