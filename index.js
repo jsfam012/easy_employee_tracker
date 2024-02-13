@@ -28,7 +28,7 @@ async function updateEmployee() {
             name: employee.first_name + " " + employee.last_name
         }
     })
-    
+
     const [allRoles] = await db.promise().query("SELECT * FROM role;");
 
     const roleChoices = allRoles.map(function (role) {
@@ -53,20 +53,44 @@ async function updateEmployee() {
         },
         //'Which role do you want to assign the selected employee?    
     ])
-    .then(answers => {
-        // make the query for the updating the role_id of the employee
-        // "UPDATE employee SET role_id = ? WHERE id = ?; "
+        .then(answers => {
+            // make the query for the updating the role_id of the employee
+            // "UPDATE employee SET role_id = ? WHERE id = ?; "
 
-        db.query(
-            "UPDATE employee set role_id = ? WHERE id = ?", 
-            [answers.role_id, answers.id],
-            function () {
-                console.log("Employee role updated successfully!")
-                mainMenu()
-            }
-        )
+            db.query(
+                "UPDATE employee set role_id = ? WHERE id = ?",
+                [answers.role_id, answers.id],
+                function () {
+                    console.log("Employee role updated successfully!")
+                    mainMenu()
+                }
+            )
+        })
+
+}
+
+function viewAllRoles() {
+    // function
+    db.query("SELECT * FROM role;", function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        console.table(result)
+        mainMenu();
     })
+}
 
+function viewAllDepartment() {
+  // function
+  db.query("SELECT * FROM department;", function (err, result) {
+    if (err) {
+        console.log(err);
+        return;
+    }
+    console.table(result)
+    mainMenu();
+})
 }
 
 async function addRole() {
@@ -242,27 +266,11 @@ function mainMenu() {
                     break;
 
                 case "View All Departments":
-                    // function
-                    db.query("SELECT * FROM department;", function (err, result) {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                        console.table(result)
-                        mainMenu();
-                    })
+                    viewAllDepartment();
                     break;
 
                 case "View All Roles":
-                    // function
-                    db.query("SELECT * FROM role;", function (err, result) {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                        console.table(result)
-                        mainMenu();
-                    })
+                    viewAllRoles();
                     break;
 
                 case "Add Employee":
