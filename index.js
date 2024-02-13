@@ -81,6 +81,19 @@ function viewAllRoles() {
     })
 }
 
+function viewAllEmployees() {
+    db.query("SELECT * FROM employee;", function (err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        //Used console.table not console.log to create table in terminal
+        console.table(result)
+        mainMenu();
+    })
+}
+
+
 function viewAllDepartment() {
   // function
   db.query("SELECT * FROM department;", function (err, result) {
@@ -253,15 +266,7 @@ function mainMenu() {
             switch (answers.action) {
                 case "View All Employees":
                     // function
-                    db.query("SELECT * FROM employee;", function (err, result) {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                        //Used console.table not console.log to create table in terminal
-                        console.table(result)
-                        mainMenu();
-                    })
+                    viewAllEmployees()
 
                     break;
 
