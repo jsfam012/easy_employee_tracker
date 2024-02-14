@@ -82,7 +82,7 @@ function viewAllRoles() {
 }
 
 function viewAllEmployees() {
-    db.query("SELECT * FROM employee;", function (err, result) {
+    db.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, manager.first_name AS m_fist_name, manager.last_name AS m_last_name FROM employee JOIN role ON employee.role_id = role.id LEFT JOIN employee AS manager ON employee.manager_id = manager.id;", function (err, result) {
         if (err) {
             console.log(err);
             return;
@@ -106,45 +106,40 @@ function viewAllDepartment() {
 })
 }
 
-async function addRole() {
-    // Preparing for the department choices           
-    const [allDepartment] = await db.promise().query("SELECT * FROM department;");
-
-    const departmentChoices = allDepartment.map(function (department) {
-
-        return {
-            value: department.id,
-            name: department.name
-        }
-    })
-
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'title',
-            message: 'What is the title of the role?'
-
-        },
-        {
-            type: 'input',
-            name: 'salary',
-            message: 'What is the salary?'
-
-        },
-        {
-            type: 'list',
-            name: 'department_id',
-            message: 'Which department does this role belong to?',
-            choices: departmentChoices
-        },
-
-
-    ])
-        .then(answers => {
+function addRole() {
+    db.query(`SELECT * FROM department`, function (err, results) {
+        const departmentChoices = results.map(function(department) {
+            return {
+                value: department.id,
+                name: department.name
+            }
+        })
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'title',
+                message: 'What is the title of the role?'
+    
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'What is the salary?'
+    
+            },
+            {
+                type: 'list',
+                name: 'department_id',
+                message: 'Which department does this role belong to?',
+                choices: departmentChoices
+            },
+    
+    
+        ]) .then(answers => {
 
 
             db.query(
-                "INSERT INTO role (title,salary, department_id) VALUES (? ,? ,?)",
+                "INSERT INTO role (title, salary, department_id) VALUES (? ,? ,?)",
                 [answers.title, answers.salary, answers.department_id],
                 function () {
                     console.log("Role has been added!")
@@ -152,6 +147,7 @@ async function addRole() {
                 }
             )
         })
+    })
 }
 
 
@@ -160,21 +156,29 @@ function addDepartment() {
     inquirer.prompt([
         {
             type: 'input',
-            name: 'action',
+            name: 'department_name',
             message: 'What is the name of the department?',
         },
-    ])
-
-        .then(answers => {
-
-            db.query(
-                "INSERT INTO department (name) VALUES (?)",
-                [answers.name], function () {
-                    console.log("Department has been added!")
-                    mainMenu();
-                }
-            )
+    ]) .then(function(data){
+        db.query(`INSERT INTO department (name) VALUES ("${data.department_name}")`, function () {
+            console.log("Department has been added!")
+            
+            mainMenu();
         })
+    })
+
+
+        // .then(answers => {
+
+        //     db.query(
+        //         "INSERT INTO department (name) VALUES (?)",
+        //         [answers.name], function () {
+        //             console.log("Department has been added!")
+        //             mainMenu();
+        //         }
+        //     )
+        // })
+
 }
 
 
@@ -227,7 +231,7 @@ async function addEmployee() {
             choices: employeeChoices
 
         },
-        // after this, 'What is employee's last name?/'What is the employee's role?'/'Who is the employee's namager?
+       
     ])
         .then(answers => {
 
@@ -281,7 +285,6 @@ function mainMenu() {
                 case "Add Employee":
                     addEmployee();
 
-                    mainMenu();
                     break;
 
                 case "Update Employee Role":
